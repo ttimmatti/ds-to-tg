@@ -3,7 +3,7 @@ parses messages from discord channels and sends updates to telegram channels
   
   
   
-Init:
+Init:  
 docker run -d --name=ds_to_tg -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=<user> -e POSTGRES_PASSWORD=<pass> -e POSTGRES_DB=ds_to_tg -p <port>:5432 postgres:12.5-alpine
 
 dbs:
