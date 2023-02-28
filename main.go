@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -46,20 +45,17 @@ func main() {
 func startReceivingDs() error {
 	log.Println("startReceiving")
 	for {
-		if errs := handleDsMsgs(); errs != nil {
-			// when return ?
-			for i, err := range errs {
-				log.Printf("startReceiving(%d): %s", i, err)
-			}
-		}
+		handleDsMsgs()
 		time.Sleep(DS_REPEAT_MINUTES * time.Minute)
 	}
 }
 
-func handleDsMsgs() []error {
-	chs, err := ds_msgs.GetAllNew()
-	if err != nil {
-		return []error{fmt.Errorf("handleDsMsgs: %w", err)}
+func handleDsMsgs() {
+	chs, errs := ds_msgs.GetAllNew()
+	if errs != nil {
+		if err := tg_msgs.HandleErrors(errs); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	i := 0
@@ -69,11 +65,8 @@ func handleDsMsgs() []error {
 	log.Printf("-- handleDsMsgs: %d new msgs", i)
 
 	if errs := tg_msgs.SendNewMsgs(chs); errs != nil {
-		for i, _ := range errs {
-			errs[i] = fmt.Errorf("handleDsMsgs: %w", errs[i])
+		if err := tg_msgs.HandleErrors(errs); err != nil {
+			log.Fatal(err)
 		}
-		return errs
 	}
-
-	return nil
 }

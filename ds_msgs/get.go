@@ -13,10 +13,12 @@ const DIS_CHANNELS_API = "https://discord.com/api/v9/channels/"
 
 var TOKEN string
 
-func GetAllNew() ([]db.Channel, error) {
+func GetAllNew() ([]db.Channel, []error) {
+	errs := []error{}
+
 	chs, err := db.ReadChannels()
 	if err != nil {
-		return nil, fmt.Errorf("GetAllNew: %w", err)
+		return nil, []error{fmt.Errorf("GetAllNew: %w", err)}
 	}
 
 	for i, ch := range chs {
@@ -26,9 +28,15 @@ func GetAllNew() ([]db.Channel, error) {
 
 		msgs, err := getNew(ch.Channel_id)
 		if err != nil {
-			return nil, fmt.Errorf("GetAllNew: %w", err)
+			errs = append(errs, fmt.Errorf("[ERROR] GetAllNew (Probably missing Access) :: %w", err))
 		}
 		chs[i].Msgs = msgs.toDb()
+
+		log.Printf("[INFO] GetAllNew: Checked %s", ch.Name)
+	}
+
+	if len(errs) != 0 {
+		return chs, errs
 	}
 
 	return chs, nil
@@ -42,7 +50,7 @@ func getNew(channel_id string) (Msgs, error) {
 		return msgsNew, fmt.Errorf("getNew: %w", err)
 	}
 
-	msgs, err := getMsgs(channel_id)
+	msgs, err := getMsgs(channel_id, 0)
 	if err != nil {
 		return msgsNew, fmt.Errorf("getNew: %w", err)
 	}

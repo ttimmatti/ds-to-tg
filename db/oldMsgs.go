@@ -11,7 +11,7 @@ func ReadChannelMsgs(channel_id string) ([]Msg, error) {
 		"select channel_id,msg_id,timestamp from "+MSGS_DB)
 	if err != nil {
 		return nil, errror.WrapErrorF(err,
-			errror.ErrorCodeFailure,
+			errror.ErrorCodeUnknown,
 			"ReadChannelMsgs_query_err", channel_id)
 	}
 

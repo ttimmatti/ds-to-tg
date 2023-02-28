@@ -39,7 +39,7 @@ func SendNewMsgs(chs []db.Channel) []error {
 
 func constructDiscordMsg(msg db.Msg, ch db.Channel) SendMsg {
 	resText := "\\#*" + escapeMarkdown(ch.Name) + "*\n\n"
-	resText += "@_" + msg.Author.Username + "_\n\n"
+	resText += "@_" + escapeMarkdown(msg.Author.Username) + "_\n\n"
 
 	dstext := msg.Content
 	resText += escapeMarkdown("=======================================\n" + dstext + "\n=======================================")
@@ -90,7 +90,7 @@ func sendMsg(msg SendMsg) error {
 	log.Println("sendMsg: ok:", ok)
 
 	if !ok {
-		return errror.NewErrorf(errror.ErrorCodeUnknown,
+		return errror.NewErrorf(errror.ErrorCodeFailure,
 			"sendMsg: ok return false. TG response: ", string(response), "Post body: "+string(msg.Text))
 	}
 
