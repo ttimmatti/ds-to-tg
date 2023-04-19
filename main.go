@@ -15,8 +15,6 @@ const WD = "/home/ttimmatti/my_scripts/go/discord_bot/"
 
 const DS_REPEAT_MINUTES = 20
 
-//https://discord.com/api/v9/channels/1017155496026841118/messages?limit=50
-
 func main() {
 	err := godotenv.Load(WD + ".env")
 	if err != nil {
