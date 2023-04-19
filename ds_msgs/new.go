@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -48,21 +49,31 @@ func getMsgs(channel_id string, tryN int) ([]Msg, error) {
 	}
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return nil, errror.WrapErrorF(
-			err,
-			errror.ErrorCodeFailure,
-			fmt.Sprintf("3getMsgs for %s", channel_id),
-		)
-	}
-	defer resp.Body.Close()
+		log.Printf("[WARN] GetAllNew: getNew: getMsgs: request failed: %s", err)
 
-	if resp.StatusCode == 500 && tryN < 1 {
 		time.Sleep(2 * time.Second)
 		msgs, err := getMsgs(channel_id, tryN+1)
 		if err == nil {
 			return msgs, nil
 		}
-		return nil, err
+		return nil, errror.WrapErrorF(
+			err,
+			errror.ErrorCodeFailure,
+			fmt.Sprintf("after 2nd try: %s", err),
+		)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && tryN < 1 {
+		log.Printf("[WARN] GetAllNew: getNew: getMsgs: Response Status: %s. for ch_id: %s",
+			resp.Status, channel_id)
+
+		time.Sleep(2 * time.Second)
+		msgs, err := getMsgs(channel_id, tryN+1)
+		if err == nil {
+			return msgs, nil
+		}
+		return nil, fmt.Errorf("after 2nd try: %w", err)
 	}
 
 	b, _ := io.ReadAll(resp.Body)

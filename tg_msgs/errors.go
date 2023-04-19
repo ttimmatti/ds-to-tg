@@ -47,7 +47,7 @@ func handleError(msg Msg, err error) {
 		}
 	case errror.ErrorCodeWrongCmd:
 		msg := SendMsg{
-			Text:       "Wrong cmd\n---------\nНеправильная команда",
+			Text:       "Wrong cmd\n---------\nНеправильная команда\nUse /help",
 			Chat_id:    msg.Chat.Id,
 			Parse_mode: "",
 		}
